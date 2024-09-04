@@ -36,7 +36,7 @@ local Main = MakeTab({Name = "TELEPORTES"})
 AddButton(Main, {
   Name = "TP +5",
   Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-342, -50, -59)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
   end
 })
 AddButton(Main, {
