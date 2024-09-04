@@ -1,4 +1,3 @@
-
 local UI = loadstring(game:HttpGet(("https://raw.githubusercontent.com/REDzHUB/LibraryV2/main/redzLib")))()
 MakeWindow({
   Hub = {
@@ -32,17 +31,207 @@ MakeNotifi({
   Text = "we changed the name from bong hub to nexware!",
   Time = 15
 })
+
 local Main = MakeTab({Name = "TELEPORTES"})
+
+-- Variáveis de voo e controle
+local flying = false
+local speed = 50  -- Velocidade de voo
+local bindKey = Enum.KeyCode.E  -- Tecla inicial do bind
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local character, humanoidRootPart
+
+local controls = {
+    W = false,
+    A = false,
+    S = false,
+    D = false,
+    Space = false,
+    Shift = false
+}
+
+-- Função para configurar o personagem e eventos de voo após renascer
+local function setupCharacter(char)
+    character = char
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    -- Funções de controle de entrada do usuário para voo
+    userInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == bindKey then
+            toggleFly()
+        end
+        if input.KeyCode == Enum.KeyCode.W then controls.W = true end
+        if input.KeyCode == Enum.KeyCode.A then controls.A = true end
+        if input.KeyCode == Enum.KeyCode.S then controls.S = true end
+        if input.KeyCode == Enum.KeyCode.D then controls.D = true end
+        if input.KeyCode == Enum.KeyCode.Space then controls.Space = true end
+        if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = true end
+    end)
+
+    userInputService.InputEnded:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.W then controls.W = false end
+        if input.KeyCode == Enum.KeyCode.A then controls.A = false end
+        if input.KeyCode == Enum.KeyCode.S then controls.S = false end
+        if input.KeyCode == Enum.KeyCode.D then controls.D = false end
+        if input.KeyCode == Enum.KeyCode.Space then controls.Space = false end
+        if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = false end
+    end)
+end
+
+-- Função de voo aprimorada
+local function fly()
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVelocity.Parent = humanoidRootPart
+    
+    local bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(9e4, 9e4, 9e4)
+    bodyGyro.P = 9e4
+    bodyGyro.CFrame = humanoidRootPart.CFrame
+    bodyGyro.Parent = humanoidRootPart
+    
+    local connection
+    connection = runService.RenderStepped:Connect(function()
+        local direction = Vector3.new()
+        
+        if controls.W then direction += workspace.CurrentCamera.CFrame.LookVector end
+        if controls.S then direction -= workspace.CurrentCamera.CFrame.LookVector end
+        if controls.A then direction -= workspace.CurrentCamera.CFrame.RightVector end
+        if controls.D then direction += workspace.CurrentCamera.CFrame.RightVector end
+        if controls.Space then direction += Vector3.new(0, 1, 0) end
+        if controls.Shift then direction -= Vector3.new(0, 1, 0) end
+        
+        bodyVelocity.Velocity = direction * speed
+        
+        if not flying then
+            bodyVelocity:Destroy()
+            bodyGyro:Destroy()
+            connection:Disconnect()
+        end
+    end)
+end
+
+local function toggleFly()
+    flying = not flying
+    if flying then
+        fly()
+    else
+        humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+    end
+end
+
+-- Detecta quando o jogador renasce e configura o personagem novamente
+player.CharacterAdded:Connect(function(char)
+    setupCharacter(char)
+end)
+
+-- Inicializa o script com o personagem atual
+if player.Character then
+    setupCharacter(player.Character)
+end
+
+-- Função para adicionar um marcador acima dos jogadores
+local function addNameTag(player)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local head = char:WaitForChild("Head")
+    
+    local nameTag = Instance.new("BillboardGui")
+    nameTag.Adornee = head
+    nameTag.Size = UDim2.new(0, 200, 0, 50)
+    nameTag.StudsOffset = Vector3.new(0, 2, 0)
+    nameTag.AlwaysOnTop = true
+    
+    local textLabel = Instance.new("TextLabel", nameTag)
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.Text = player.Name
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextSize = 14
+    
+    nameTag.Parent = head
+end
+
+-- Função para remover o marcador dos jogadores
+local function removeNameTag(player)
+    local char = player.Character
+    if char and char:FindFirstChild("Head") then
+        local head = char.Head
+        if head:FindFirstChild("BillboardGui") then
+            head.BillboardGui:Destroy()
+        end
+    end
+end
+
+local nameTagEnabled = false
+
+-- Função para alternar os marcadores
+local function toggleNameTags()
+    nameTagEnabled = not nameTagEnabled
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if nameTagEnabled then
+            addNameTag(player)
+        else
+            removeNameTag(player)
+        end
+    end
+end
+
+-- Botão para ativar/desativar os marcadores
+AddButton(Main, {
+  Name = "Ativar/Desativar Nome dos Jogadores",
+  Callback = function()
+    toggleNameTags()
+  end
+})
+
+-- Detecta quando novos jogadores entram no jogo e aplica ou remove o marcador
+game.Players.PlayerAdded:Connect(function(newPlayer)
+    if nameTagEnabled then
+        newPlayer.CharacterAdded:Connect(function()
+            addNameTag(newPlayer)
+        end)
+    end
+end)
+
+-- Botão para configurar o bind de voo no GUI
+AddButton(Main, {
+  Name = "Configurar Bind de Voo",
+  Callback = function()
+    MakeNotifi({
+      Title = "Configuração de Bind",
+      Text = "Pressione a nova tecla para o voo.",
+      Time = 5
+    })
+    
+    -- Escuta a próxima tecla pressionada
+    local connection
+    connection = userInputService.InputBegan:Connect(function(input)
+        bindKey = input.KeyCode
+        MakeNotifi({
+          Title = "Bind Configurado",
+          Text = "Nova tecla de voo: " .. tostring(bindKey.Name),
+          Time = 5
+        })
+        connection:Disconnect()
+    end)
+  end
+})
+
+-- Botão para ativar/desativar o voo
+AddButton(Main, {
+  Name = "Ativar/Desativar Voo",
+  Callback = function()
+    toggleFly()  -- Ativa ou desativa o voo ao clicar no botão
+  end
+})
+
 AddButton(Main, {
   Name = "TP +5",
   Callback = function()
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
-  end
-})
-AddButton(Main, {
-  Name = "Portão do SCP",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-54, 250, -192)
   end
 })
 AddButton(Main, {
@@ -63,11 +252,12 @@ AddButton(Main, {
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-109, 250, -150)
   end
 })
+
 local DC = MakeTab({Name = "Nosso Discord"})
 AddButton(DC, {
   Name = "Clique aqui para nosso discord",
   Callback = function()
-setclipboard("https://discord.com/invite/TdFRGRQAYj")
-print("https://discord.com/invite/TdFRGRQAYj")
-end
+    setclipboard("https://discord.com/invite/TdFRGRQAYj")
+    print("https://discord.com/invite/TdFRGRQAYj")
+  end
 })
