@@ -6,7 +6,7 @@ MakeWindow({
     Animation = "Gomes On Top"
   },
   Key = {
-    KeySystem = true,
+    KeySystem = false,
     Title = "TESTE1 Key",
     Description = "Pegue a key para acessar o script!",
     KeyLink = "https://link-hub.net/1085373/key-bong-hub",
@@ -32,11 +32,11 @@ MakeNotifi({
   Text = "we changed the name from bong hub to nexware!",
   Time = 15
 })
-local Main = MakeTab({Name = "SCP 173 Demonstration"})
+local Main = MakeTab({Name = "TELEPORTES"})
 AddButton(Main, {
-  Name = "TP para base",
+  Name = "TP +5",
   Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-103, 260, -189)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-342, -50, -59)
   end
 })
 AddButton(Main, {
