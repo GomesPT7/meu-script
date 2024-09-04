@@ -42,6 +42,9 @@ local userInputService = game:GetService("UserInputService")
 local runService = game:GetService("RunService")
 local character, humanoidRootPart
 local controls = {W = false, A = false, S = false, D = false, Space = false, Shift = false}
+local camera = workspace.CurrentCamera
+local fixCameraEnabled = false
+local fixCameraConnection
 
 -- Função para configurar o personagem e eventos de voo após renascer
 local function setupCharacter(char)
@@ -66,10 +69,10 @@ local function fly()
     connection = runService.RenderStepped:Connect(function()
         local direction = Vector3.new()
         
-        if controls.W then direction += workspace.CurrentCamera.CFrame.LookVector end
-        if controls.S then direction -= workspace.CurrentCamera.CFrame.LookVector end
-        if controls.A then direction -= workspace.CurrentCamera.CFrame.RightVector end
-        if controls.D then direction += workspace.CurrentCamera.CFrame.RightVector end
+        if controls.W then direction += camera.CFrame.LookVector end
+        if controls.S then direction -= camera.CFrame.LookVector end
+        if controls.A then direction -= camera.CFrame.RightVector end
+        if controls.D then direction += camera.CFrame.RightVector end
         if controls.Space then direction += Vector3.new(0, 1, 0) end
         if controls.Shift then direction -= Vector3.new(0, 1, 0) end
         
@@ -127,6 +130,8 @@ local function addNameTag(player)
     textLabel.TextStrokeTransparency = 0.5
     textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     textLabel.TextSize = 14
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextScaled = true
     textLabel.Parent = nameTag
     
     nameTag.Parent = head
@@ -182,15 +187,6 @@ AddButton(Visual, {
   end
 })
 
--- Detecta quando novos jogadores entram no jogo e aplica ou remove o marcador
-game.Players.PlayerAdded:Connect(function(newPlayer)
-    newPlayer.CharacterAdded:Connect(function(char)
-        if nameTagEnabled then
-            addNameTag(newPlayer)
-        end
-    end)
-end)
-
 local Misc = MakeTab({Name = "Misc"})
 
 -- Botão para ativar/desativar o voo
@@ -201,8 +197,59 @@ AddButton(Misc, {
   end
 })
 
--- Configura os controles de voo
+-- Função para fixar a visão na cabeça do jogador mais próximo
+local function lookAtClosestPlayer()
+    local closestPlayer = nil
+    local closestDistance = math.huge
+    
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
+            local distance = (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestPlayer = otherPlayer
+            end
+        end
+    end
+    
+    if closestPlayer then
+        local headPosition = closestPlayer.Character.Head.Position
+        camera.CFrame = CFrame.lookAt(camera.CFrame.Position, headPosition)
+    end
+end
+
+local function toggleFixCamera()
+    fixCameraEnabled = not fixCameraEnabled
+
+    if fixCameraEnabled then
+        fixCameraConnection = runService.RenderStepped:Connect(function()
+            if fixCameraEnabled then
+                lookAtClosestPlayer()
+            end
+        end)
+    else
+        if fixCameraConnection then
+            fixCameraConnection:Disconnect()
+            fixCameraConnection = nil
+        end
+    end
+end
+
+-- Botão para ativar/desativar a fixação da câmera
+AddButton(Misc, {
+  Name = "Ativar/Desativar Foco na Cabeça do Jogador Mais Próximo",
+  Callback = function()
+    toggleFixCamera()
+  end
+})
+
+-- Configura o atalho de teclado para fixar a visão
 userInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.E then
+        fixCameraEnabled = true
+        lookAtClosestPlayer()
+    end
+
     if input.KeyCode == Enum.KeyCode.W then controls.W = true end
     if input.KeyCode == Enum.KeyCode.A then controls.A = true end
     if input.KeyCode == Enum.KeyCode.S then controls.S = true end
@@ -212,6 +259,10 @@ userInputService.InputBegan:Connect(function(input)
 end)
 
 userInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.E then
+        fixCameraEnabled = false
+    end
+
     if input.KeyCode == Enum.KeyCode.W then controls.W = false end
     if input.KeyCode == Enum.KeyCode.A then controls.A = false end
     if input.KeyCode == Enum.KeyCode.S then controls.S = false end
