@@ -7,7 +7,7 @@ MakeWindow({
   },
   Key = {
     KeySystem = true,
-    Title = "TESTE Key",
+    Title = "TESTE1 Key",
     Description = "Pegue a key para acessar o script!",
     KeyLink = "https://link-hub.net/1085373/key-bong-hub",
     Keys = {"Gomes"},
