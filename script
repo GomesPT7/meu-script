@@ -1,4 +1,4 @@
-local UI = loadstring(game:HttpGet(("https://raw.githubusercontent.com/REDzHUB/LibraryV2/main/redzLib")))()
+local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/LibraryV2/main/redzLib"))()
 MakeWindow({
   Hub = {
     Title = "Gomes V1",
@@ -32,64 +32,34 @@ MakeNotifi({
   Time = 15
 })
 
-local Main = MakeTab({Name = "TELEPORTES"})
+local TP = MakeTab({Name = "TELEPORTES"})
 
 -- Variáveis de voo e controle
 local flying = false
-local speed = 50  -- Velocidade de voo
-local bindKey = Enum.KeyCode.E  -- Tecla inicial do bind
+local speed = 50
 local player = game.Players.LocalPlayer
 local userInputService = game:GetService("UserInputService")
 local runService = game:GetService("RunService")
 local character, humanoidRootPart
-
-local controls = {
-    W = false,
-    A = false,
-    S = false,
-    D = false,
-    Space = false,
-    Shift = false
-}
+local controls = {W = false, A = false, S = false, D = false, Space = false, Shift = false}
 
 -- Função para configurar o personagem e eventos de voo após renascer
 local function setupCharacter(char)
     character = char
     humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
-    -- Funções de controle de entrada do usuário para voo
-    userInputService.InputBegan:Connect(function(input)
-        if input.KeyCode == bindKey then
-            toggleFly()
-        end
-        if input.KeyCode == Enum.KeyCode.W then controls.W = true end
-        if input.KeyCode == Enum.KeyCode.A then controls.A = true end
-        if input.KeyCode == Enum.KeyCode.S then controls.S = true end
-        if input.KeyCode == Enum.KeyCode.D then controls.D = true end
-        if input.KeyCode == Enum.KeyCode.Space then controls.Space = true end
-        if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = true end
-    end)
-
-    userInputService.InputEnded:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.W then controls.W = false end
-        if input.KeyCode == Enum.KeyCode.A then controls.A = false end
-        if input.KeyCode == Enum.KeyCode.S then controls.S = false end
-        if input.KeyCode == Enum.KeyCode.D then controls.D = false end
-        if input.KeyCode == Enum.KeyCode.Space then controls.Space = false end
-        if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = false end
-    end)
 end
 
 -- Função de voo aprimorada
 local function fly()
     local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
     bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bodyVelocity.Parent = humanoidRootPart
     
     local bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.CFrame = humanoidRootPart.CFrame
     bodyGyro.MaxTorque = Vector3.new(9e4, 9e4, 9e4)
     bodyGyro.P = 9e4
-    bodyGyro.CFrame = humanoidRootPart.CFrame
     bodyGyro.Parent = humanoidRootPart
     
     local connection
@@ -137,6 +107,11 @@ local function addNameTag(player)
     local char = player.Character or player.CharacterAdded:Wait()
     local head = char:WaitForChild("Head")
     
+    -- Remove qualquer marcador antigo para evitar sobreposição
+    if head:FindFirstChild("BillboardGui") then
+        head.BillboardGui:Destroy()
+    end
+
     local nameTag = Instance.new("BillboardGui")
     nameTag.Adornee = head
     nameTag.Size = UDim2.new(0, 200, 0, 50)
@@ -179,8 +154,18 @@ local function toggleNameTags()
     end
 end
 
+-- Botão de teletransporte
+AddButton(TP, {
+  Name = "TP +5",
+  Callback = function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
+  end
+})
+
+local Visual = MakeTab({Name = "Visual"})
+
 -- Botão para ativar/desativar os marcadores
-AddButton(Main, {
+AddButton(Visual, {
   Name = "Ativar/Desativar Nome dos Jogadores",
   Callback = function()
     toggleNameTags()
@@ -189,71 +174,45 @@ AddButton(Main, {
 
 -- Detecta quando novos jogadores entram no jogo e aplica ou remove o marcador
 game.Players.PlayerAdded:Connect(function(newPlayer)
-    if nameTagEnabled then
-        newPlayer.CharacterAdded:Connect(function()
+    newPlayer.CharacterAdded:Connect(function(char)
+        if nameTagEnabled then
             addNameTag(newPlayer)
-        end)
-    end
+        end
+    end)
 end)
 
--- Botão para configurar o bind de voo no GUI
-AddButton(Main, {
-  Name = "Configurar Bind de Voo",
-  Callback = function()
-    MakeNotifi({
-      Title = "Configuração de Bind",
-      Text = "Pressione a nova tecla para o voo.",
-      Time = 5
-    })
-    
-    -- Escuta a próxima tecla pressionada
-    local connection
-    connection = userInputService.InputBegan:Connect(function(input)
-        bindKey = input.KeyCode
-        MakeNotifi({
-          Title = "Bind Configurado",
-          Text = "Nova tecla de voo: " .. tostring(bindKey.Name),
-          Time = 5
-        })
-        connection:Disconnect()
-    end)
-  end
-})
+local Misc = MakeTab({Name = "Misc"})
 
 -- Botão para ativar/desativar o voo
-AddButton(Main, {
+AddButton(Misc, {
   Name = "Ativar/Desativar Voo",
   Callback = function()
-    toggleFly()  -- Ativa ou desativa o voo ao clicar no botão
+    toggleFly()
   end
 })
 
-AddButton(Main, {
-  Name = "TP +5",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
-  end
-})
-AddButton(Main, {
-  Name = "Negócio de natal",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-74, 232, 395)
-  end
-})
-AddButton(Main, {
-  Name = "Fora da parte da fundação",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-95, 278, -196)
-  end
-})
-AddButton(Main, {
-  Name = "Voltar no spawn",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-109, 250, -150)
-  end
-})
+-- Configura os controles de voo
+userInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then controls.W = true end
+    if input.KeyCode == Enum.KeyCode.A then controls.A = true end
+    if input.KeyCode == Enum.KeyCode.S then controls.S = true end
+    if input.KeyCode == Enum.KeyCode.D then controls.D = true end
+    if input.KeyCode == Enum.KeyCode.Space then controls.Space = true end
+    if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = true end
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then controls.W = false end
+    if input.KeyCode == Enum.KeyCode.A then controls.A = false end
+    if input.KeyCode == Enum.KeyCode.S then controls.S = false end
+    if input.KeyCode == Enum.KeyCode.D then controls.D = false end
+    if input.KeyCode == Enum.KeyCode.Space then controls.Space = false end
+    if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = false end
+end)
 
 local DC = MakeTab({Name = "Nosso Discord"})
+
+-- Botão para acessar o Discord
 AddButton(DC, {
   Name = "Clique aqui para nosso discord",
   Callback = function()
