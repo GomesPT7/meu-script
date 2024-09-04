@@ -32,7 +32,7 @@ MakeNotifi({
   Time = 15
 })
 
-local TP = MakeTab({Name = "TELEPORTES"})
+local TP = MakeTab({Name = "Teleport"})
 
 -- Variáveis de voo e controle
 local flying = false
@@ -117,14 +117,17 @@ local function addNameTag(player)
     nameTag.Size = UDim2.new(0, 200, 0, 50)
     nameTag.StudsOffset = Vector3.new(0, 2, 0)
     nameTag.AlwaysOnTop = true
-    
-    local textLabel = Instance.new("TextLabel", nameTag)
+
+    -- Texto dentro do marcador
+    local textLabel = Instance.new("TextLabel")
     textLabel.Size = UDim2.new(1, 0, 1, 0)
     textLabel.Text = player.Name
     textLabel.BackgroundTransparency = 1
     textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    textLabel.TextStrokeTransparency = 0
+    textLabel.TextStrokeTransparency = 0.5
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     textLabel.TextSize = 14
+    textLabel.Parent = nameTag
     
     nameTag.Parent = head
 end
@@ -159,6 +162,13 @@ AddButton(TP, {
   Name = "TP +5",
   Callback = function()
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
+  end
+})
+
+AddButton(TP, {
+  Name = "TP +7 jogo 2",
+  Callback = function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-98, 7, -1612)
   end
 })
 
