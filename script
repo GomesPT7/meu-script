@@ -3,7 +3,7 @@ local UI = loadstring(game:HttpGet(("https://raw.githubusercontent.com/REDzHUB/L
 MakeWindow({
   Hub = {
     Title = "Gomes V1",
-    Animation = "Nexware On Top"
+    Animation = "Gomes On Top"
   },
   Key = {
     KeySystem = true,
