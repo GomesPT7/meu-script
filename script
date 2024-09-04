@@ -10,7 +10,7 @@ MakeWindow({
     Title = "Gomes Key",
     Description = "Pegue a key para acessar o script!",
     KeyLink = "https://link-hub.net/1085373/key-bong-hub",
-    Keys = {"BorisÉUmViado"},
+    Keys = {"Gomes"},
     Notifi = {
       Notifications = true,
       CorrectKey = "Correto!",
