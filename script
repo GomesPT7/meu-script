@@ -136,6 +136,53 @@ local function addNameTag(player)
     
     nameTag.Parent = head
 end
+    
+local Visual = MakeTab({Name = "Visual"})
+
+-- Função para adicionar um box/glow ao redor do jogador
+local function addBoxAroundPlayer(player)
+    local char = player.Character or player.CharacterAdded:Wait()
+    if char:FindFirstChild("Highlight") then
+        char.Highlight:Destroy()
+    end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Adornee = char
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)  -- Cor vermelha
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)  -- Cor branca para o contorno
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop  -- Aparece sempre, mesmo através de paredes
+    highlight.Parent = char
+end
+
+-- Função para remover o box/glow ao redor do jogador
+local function removeBoxAroundPlayer(player)
+    local char = player.Character
+    if char and char:FindFirstChild("Highlight") then
+        char.Highlight:Destroy()
+    end
+end
+
+local boxEnabled = false
+
+-- Função para alternar a visibilidade do box/glow
+local function toggleBoxes()
+    boxEnabled = not boxEnabled
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if boxEnabled then
+            addBoxAroundPlayer(player)
+        else
+            removeBoxAroundPlayer(player)
+        end
+    end
+end
+
+-- Botão para ativar/desativar o box/glow ao redor dos jogadores
+AddButton(Visual, {
+    Name = "Ativar/Desativar Glow nos Jogadores",
+    Callback = function()
+        toggleBoxes()
+    end
+})
 
 -- Função para remover o marcador dos jogadores
 local function removeNameTag(player)
@@ -197,21 +244,24 @@ AddButton(Misc, {
   end
 })
 
--- Função para fixar a visão no jogador mais alinhado com a mira fixa
-local function lookAtPlayerInCrosshair()
+-- Função para fixar a visão no jogador mais próximo à linha de visão
+local function lookAtClosestPlayerInCrosshair()
     local closestPlayer = nil
-    local closestDotProduct = -math.huge
+    local closestMagnitude = math.huge
     
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
             local headPosition = otherPlayer.Character.Head.Position
-            local directionToHead = (headPosition - camera.CFrame.Position).unit
-            local cameraDirection = camera.CFrame.LookVector
-            local dotProduct = directionToHead:Dot(cameraDirection)
+            local screenPoint, onScreen = camera:WorldToScreenPoint(headPosition)
             
-            if dotProduct > closestDotProduct then
-                closestDotProduct = dotProduct
-                closestPlayer = otherPlayer
+            if onScreen then
+                local cursorPosition = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+                local magnitude = (Vector2.new(screenPoint.X, screenPoint.Y) - cursorPosition).Magnitude
+                
+                if magnitude < closestMagnitude then
+                    closestMagnitude = magnitude
+                    closestPlayer = otherPlayer
+                end
             end
         end
     end
@@ -228,7 +278,7 @@ local function toggleFixCamera()
     if fixCameraEnabled then
         fixCameraConnection = runService.RenderStepped:Connect(function()
             if fixCameraEnabled then
-                lookAtPlayerInCrosshair()
+                lookAtClosestPlayerInCrosshair()
             end
         end)
     else
