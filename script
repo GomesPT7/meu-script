@@ -197,16 +197,20 @@ AddButton(Misc, {
   end
 })
 
--- Função para fixar a visão na cabeça do jogador mais próximo
-local function lookAtClosestPlayer()
+-- Função para fixar a visão no jogador mais alinhado com a mira fixa
+local function lookAtPlayerInCrosshair()
     local closestPlayer = nil
-    local closestDistance = math.huge
+    local closestDotProduct = -math.huge
     
     for _, otherPlayer in pairs(game.Players:GetPlayers()) do
         if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
-            local distance = (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).magnitude
-            if distance < closestDistance then
-                closestDistance = distance
+            local headPosition = otherPlayer.Character.Head.Position
+            local directionToHead = (headPosition - camera.CFrame.Position).unit
+            local cameraDirection = camera.CFrame.LookVector
+            local dotProduct = directionToHead:Dot(cameraDirection)
+            
+            if dotProduct > closestDotProduct then
+                closestDotProduct = dotProduct
                 closestPlayer = otherPlayer
             end
         end
@@ -224,7 +228,7 @@ local function toggleFixCamera()
     if fixCameraEnabled then
         fixCameraConnection = runService.RenderStepped:Connect(function()
             if fixCameraEnabled then
-                lookAtClosestPlayer()
+                lookAtPlayerInCrosshair()
             end
         end)
     else
@@ -237,7 +241,7 @@ end
 
 -- Botão para ativar/desativar a fixação da câmera
 AddButton(Misc, {
-  Name = "Ativar/Desativar Foco na Cabeça do Jogador Mais Próximo",
+  Name = "Ativar/Desativar Foco no Jogador Alinhado com a Mira",
   Callback = function()
     toggleFixCamera()
   end
@@ -247,7 +251,7 @@ AddButton(Misc, {
 userInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.E then
         fixCameraEnabled = true
-        lookAtClosestPlayer()
+        lookAtPlayerInCrosshair()
     end
 
     if input.KeyCode == Enum.KeyCode.W then controls.W = true end
