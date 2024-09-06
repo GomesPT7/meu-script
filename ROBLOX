@@ -33,6 +33,9 @@ MakeNotifi({
 })
 
 local TP = MakeTab({Name = "Teleport"})
+local Visual = MakeTab({Name = "Visual"})
+local Misc = MakeTab({Name = "Misc"})
+local DC = MakeTab({Name = "Nosso Discord"})
 
 -- Variáveis de voo e controle
 local flying = false
@@ -136,8 +139,6 @@ local function addNameTag(player)
     
     nameTag.Parent = head
 end
-    
-local Visual = MakeTab({Name = "Visual"})
 
 -- Função para adicionar um box/glow ao redor do jogador
 local function addBoxAroundPlayer(player)
@@ -176,14 +177,6 @@ local function toggleBoxes()
     end
 end
 
--- Botão para ativar/desativar o box/glow ao redor dos jogadores
-AddButton(Visual, {
-    Name = "Ativar/Desativar Glow nos Jogadores",
-    Callback = function()
-        toggleBoxes()
-    end
-})
-
 -- Função para remover o marcador dos jogadores
 local function removeNameTag(player)
     local char = player.Character
@@ -208,41 +201,6 @@ local function toggleNameTags()
         end
     end
 end
-
--- Botão de teletransporte
-AddButton(TP, {
-  Name = "TP +5",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
-  end
-})
-
-AddButton(TP, {
-  Name = "TP +7 jogo 2",
-  Callback = function()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-98, 7, -1612)
-  end
-})
-
-local Visual = MakeTab({Name = "Visual"})
-
--- Botão para ativar/desativar os marcadores
-AddButton(Visual, {
-  Name = "Ativar/Desativar Nome dos Jogadores",
-  Callback = function()
-    toggleNameTags()
-  end
-})
-
-local Misc = MakeTab({Name = "Misc"})
-
--- Botão para ativar/desativar o voo
-AddButton(Misc, {
-  Name = "Ativar/Desativar Voo",
-  Callback = function()
-    toggleFly()
-  end
-})
 
 -- Função para fixar a visão no jogador mais próximo à linha de visão
 local function lookAtClosestPlayerInCrosshair()
@@ -289,7 +247,42 @@ local function toggleFixCamera()
     end
 end
 
--- Botão para ativar/desativar a fixação da câmera
+-- Botões
+AddButton(TP, {
+  Name = "TP +5",
+  Callback = function()
+    player.Character.HumanoidRootPart.CFrame = CFrame.new(-506, 9, -71)
+  end
+})
+
+AddButton(TP, {
+  Name = "TP +7 jogo 2",
+  Callback = function()
+    player.Character.HumanoidRootPart.CFrame = CFrame.new(-98, 7, -1612)
+  end
+})
+
+AddButton(Visual, {
+  Name = "Ativar/Desativar Glow nos Jogadores",
+  Callback = function()
+    toggleBoxes()
+  end
+})
+
+AddButton(Visual, {
+  Name = "Ativar/Desativar Nome dos Jogadores",
+  Callback = function()
+    toggleNameTags()
+  end
+})
+
+AddButton(Misc, {
+  Name = "Ativar/Desativar Voo",
+  Callback = function()
+    toggleFly()
+  end
+})
+
 AddButton(Misc, {
   Name = "Ativar/Desativar Foco no Jogador Alinhado com a Mira",
   Callback = function()
@@ -297,11 +290,19 @@ AddButton(Misc, {
   end
 })
 
--- Configura o atalho de teclado para fixar a visão
+AddButton(DC, {
+  Name = "Clique aqui para nosso discord",
+  Callback = function()
+    setclipboard("https://discord.com/invite/TdFRGRQAYj")
+    print("https://discord.com/invite/TdFRGRQAYj")
+  end
+})
+
+-- Controle de entrada do teclado
 userInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.E then
         fixCameraEnabled = true
-        lookAtPlayerInCrosshair()
+        lookAtClosestPlayerInCrosshair()
     end
 
     if input.KeyCode == Enum.KeyCode.W then controls.W = true end
@@ -324,14 +325,3 @@ userInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.Space then controls.Space = false end
     if input.KeyCode == Enum.KeyCode.LeftShift then controls.Shift = false end
 end)
-
-local DC = MakeTab({Name = "Nosso Discord"})
-
--- Botão para acessar o Discord
-AddButton(DC, {
-  Name = "Clique aqui para nosso discord",
-  Callback = function()
-    setclipboard("https://discord.com/invite/TdFRGRQAYj")
-    print("https://discord.com/invite/TdFRGRQAYj")
-  end
-})
