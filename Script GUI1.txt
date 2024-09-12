@@ -1,0 +1,160 @@
+local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/LibraryV2/main/redzLib"))()
+MakeWindow({
+  Hub = {
+    Title = "FREE Spin For Free",
+    Animation = "Script by cyifog"
+  },
+  Key = {
+    KeySystem = false,
+    Title = "KEY SYSTEM",
+    Description = "Pegue a key para acessar o script!",
+    KeyLink = "https://link-hub.net/1085373/key-bong-hub",
+    Keys = {"Gomes"},
+    Notifi = {
+      Notifications = true,
+      CorrectKey = "Correto!",
+      Incorrectkey = "incorreto!",
+      CopyKeyLink = "Copiado"
+    }
+  }
+})
+
+MinimizeButton({
+  Image = "",
+  Size = {40, 40},
+  Color = Color3.fromRGB(10, 10, 10),
+  Corner = true,
+  Stroke = true,
+  StrokeColor = Color3.fromRGB(20, 10, 10)
+})
+
+MakeNotifi({
+  Title = "We are bong hub!",
+  Text = "we changed the name from bong hub to nexware!",
+  Time = 15
+})
+
+local TP = MakeTab({Name = "Teleport"})
+local DC = MakeTab({Name = "Nosso Discord"})
+local Gamepass = MakeTab({Name = "Gamepass"})
+
+-- Variáveis do jogador
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+
+-- Variáveis para controle do teletransporte automático
+local autoTeleportEnabled = false
+local teleportThread
+
+-- Detecta quando o jogador renasce e configura o personagem novamente
+player.CharacterAdded:Connect(function(char)
+    -- Configura o personagem
+end)
+
+-- Inicializa o script com o personagem atual
+if player.Character then
+    -- Configura o personagem
+end
+
+-- Função para iniciar o teletransporte automático
+local function startAutoTeleport()
+    autoTeleportEnabled = true
+    teleportThread = coroutine.create(function()
+        while autoTeleportEnabled do
+            -- Primeiro, teleporta para uma posição próxima do bloco
+            local nearPosition = CFrame.new(-100, 5, -1600)  -- Ajuste esta posição conforme necessário
+            player.Character.HumanoidRootPart.CFrame = nearPosition
+            print("Teleportado para uma posição próxima:", nearPosition.Position)
+            
+            wait(3)  -- Aguarda 5 segundos para garantir que o jogador esteja na nova posição
+            
+            -- Agora, tenta encontrar e teletransportar para o bloco
+            local targetBlock = workspace.Parkour.Wins:FindFirstChild("14")
+            
+            if targetBlock then
+                -- Teleporta para o bloco
+                player.Character.HumanoidRootPart.CFrame = targetBlock.CFrame
+                print("Teleportado para:", targetBlock.Position)  -- Imprime a posição no console
+
+                -- Aguarda um pouco para garantir que o teletransporte foi concluído
+                wait(3)  -- Aguarda 3 segundos
+
+                -- Adiciona uma pausa antes do próximo teletransporte
+                wait(2)  -- Aguarda 2 segundos antes do próximo teletransporte
+            else
+                print("Bloco alvo não encontrado.")  -- Mensagem de erro se o bloco não for encontrado
+                wait(2)  -- Aguarda 2 segundos antes de tentar novamente
+            end
+        end
+    end)
+    coroutine.resume(teleportThread)
+end
+
+-- Função para parar o teletransporte automático
+local function stopAutoTeleport()
+    autoTeleportEnabled = false
+    if teleportThread then
+        coroutine.close(teleportThread)
+        teleportThread = nil
+    end
+end
+
+-- Botão para ativar/desativar o teletransporte automático
+AddButton(TP, {
+    Name = "Toggle Auto Farm +14",
+    Callback = function()
+        if autoTeleportEnabled then
+            stopAutoTeleport()
+            print("Auto teleport desativado.")
+        else
+            startAutoTeleport()
+            print("Auto teleport ativado.")
+        end
+    end
+})
+
+-- Botão para ativar AutoSpin
+AddButton(Gamepass, {
+    Name = "Ativar AutoSpin",
+    Callback = function()
+        local gamepass = player:FindFirstChild("Gamepass")
+        if gamepass and gamepass:FindFirstChild("AutoSpin") then
+            gamepass.AutoSpin.Value = true
+            print("AutoSpin ativado.")
+        else
+            print("Gamepass ou AutoSpin não encontrado.")
+        end
+    end
+})
+
+-- Botão para definir LuckMulti para 999
+AddButton(Gamepass, {
+    Name = "Definir LuckMulti para 999",
+    Callback = function()
+        local upgradeStats = player:FindFirstChild("UpgradeStats")
+        if upgradeStats and upgradeStats:FindFirstChild("LuckMulti") then
+            upgradeStats.LuckMulti.Value = 999
+            print("LuckMulti definido para 999.")
+        else
+            print("UpgradeStats ou LuckMulti não encontrado.")
+        end
+    end
+})
+
+-- Discord
+AddButton(DC, {
+  Name = "Clique aqui para nosso discord",
+  Callback = function()
+    setclipboard("https://discord.com/invite/TdFRGRQAYj")
+    print("https://discord.com/invite/TdFRGRQAYj")
+  end
+})
+
+-- Controle de entrada do teclado
+userInputService.InputBegan:Connect(function(input)
+    -- Controla o personagem
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    -- Controla o personagem
+end)
