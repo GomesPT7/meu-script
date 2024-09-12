@@ -5,11 +5,11 @@ MakeWindow({
     Animation = "Script by cyifog"
   },
   Key = {
-    KeySystem = false,
+    KeySystem = true,
     Title = "KEY SYSTEM",
     Description = "Get the key to access the script!",
-    KeyLink = "https://link-hub.net/1085373/key-bong-hub",
-    Keys = {"Gomes"},
+    KeyLink = "https://link-target.net/395188/access-script-key",
+    Keys = {"fnuianf9931"},
     Notifi = {
       Notifications = true,
       CorrectKey = "Correct!",
