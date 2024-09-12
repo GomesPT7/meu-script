@@ -1,0 +1,113 @@
+-- Carregue a biblioteca DrRayLibrary
+local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
+
+-- Crie a janela usando DrRayLibrary
+local window = DrRayLibrary:Load("FREE Spin For Free", "Default")
+
+-- Variáveis do jogador
+local player = game.Players.LocalPlayer
+local userInputService = game:GetService("UserInputService")
+
+-- Variáveis para controle do teletransporte automático
+local autoTeleportEnabled = false
+local teleportThread
+
+-- Adicione a aba de Teleport
+local teleportTab = DrRayLibrary.newTab("Teleport", "ImageIdHere")
+
+-- Função para iniciar o teletransporte automático
+local function startAutoTeleport()
+    autoTeleportEnabled = true
+    teleportThread = coroutine.create(function()
+        while autoTeleportEnabled do
+            -- Primeiro, teleporta para uma posição próxima do bloco
+            local nearPosition = CFrame.new(-100, 5, -1600)  -- Ajuste esta posição conforme necessário
+            player.Character.HumanoidRootPart.CFrame = nearPosition
+            print("Teleportado para uma posição próxima:", nearPosition.Position)
+            
+            wait(3)  -- Aguarda 3 segundos para garantir que o jogador esteja na nova posição
+            
+            -- Agora, tenta encontrar e teletransportar para o bloco
+            local targetBlock = workspace.Parkour.Wins:FindFirstChild("14")
+            
+            if targetBlock then
+                -- Teleporta para o bloco
+                player.Character.HumanoidRootPart.CFrame = targetBlock.CFrame
+                print("Teleportado para:", targetBlock.Position)  -- Imprime a posição no console
+
+                -- Aguarda um pouco para garantir que o teletransporte foi concluído
+                wait(3)  -- Aguarda 3 segundos
+
+                -- Adiciona uma pausa antes do próximo teletransporte
+                wait(2)  -- Aguarda 2 segundos antes do próximo teletransporte
+            else
+                print("Bloco alvo não encontrado.")  -- Mensagem de erro se o bloco não for encontrado
+                wait(2)  -- Aguarda 2 segundos antes de tentar novamente
+            end
+        end
+    end)
+    coroutine.resume(teleportThread)
+end
+
+-- Função para parar o teletransporte automático
+local function stopAutoTeleport()
+    autoTeleportEnabled = false
+    if teleportThread then
+        coroutine.close(teleportThread)
+        teleportThread = nil
+    end
+end
+
+-- Botão para ativar/desativar o teletransporte automático
+teleportTab.newButton("Toggle Auto Farm +14", "Click to toggle auto teleport", function()
+    if autoTeleportEnabled then
+        stopAutoTeleport()
+        print("Auto teleport desativado.")
+    else
+        startAutoTeleport()
+        print("Auto teleport ativado.")
+    end
+end)
+
+-- Adicione a aba de Gamepass
+local gamepassTab = DrRayLibrary.newTab("Gamepass", "ImageIdHere")
+
+-- Botão para ativar AutoSpin
+gamepassTab.newButton("Ativar AutoSpin", "Click to activate AutoSpin", function()
+    local gamepass = player:FindFirstChild("Gamepass")
+    if gamepass and gamepass:FindFirstChild("AutoSpin") then
+        gamepass.AutoSpin.Value = true
+        print("AutoSpin ativado.")
+    else
+        print("Gamepass ou AutoSpin não encontrado.")
+    end
+end)
+
+-- Botão para definir LuckMulti para 999
+gamepassTab.newButton("Definir LuckMulti para 999", "Click to set LuckMulti to 999", function()
+    local upgradeStats = player:FindFirstChild("UpgradeStats")
+    if upgradeStats and upgradeStats:FindFirstChild("LuckMulti") then
+        upgradeStats.LuckMulti.Value = 999
+        print("LuckMulti definido para 999.")
+    else
+        print("UpgradeStats ou LuckMulti não encontrado.")
+    end
+end)
+
+-- Adicione a aba de Discord
+local discordTab = DrRayLibrary.newTab("Nosso Discord", "ImageIdHere")
+
+-- Botão para copiar link do Discord
+discordTab.newButton("Clique aqui para nosso Discord", "Click to copy Discord link", function()
+    setclipboard("https://discord.com/invite/TdFRGRQAYj")
+    print("https://discord.com/invite/TdFRGRQAYj")
+end)
+
+-- Controle de entrada do teclado
+userInputService.InputBegan:Connect(function(input)
+    -- Controla o personagem
+end)
+
+userInputService.InputEnded:Connect(function(input)
+    -- Controla o personagem
+end)
